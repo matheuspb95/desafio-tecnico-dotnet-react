@@ -2,11 +2,12 @@ using Data;
 using Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-namespace csharp_crud_api.Controllers;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/user")]
 public class UsersController : ControllerBase
 {
   private readonly UserContext _context;
@@ -16,14 +17,14 @@ public class UsersController : ControllerBase
     _context = context;
   }
 
-  // GET: api/users
+  [Authorize]
   [HttpGet]
   public async Task<ActionResult<IEnumerable<User>>> GetUsers()
   {
     return await _context.Users.ToListAsync();
   }
 
-  // GET: api/users/5
+  [Authorize]
   [HttpGet("{id}")]
   public async Task<ActionResult<User>> GetUser(int id)
   {
@@ -37,17 +38,18 @@ public class UsersController : ControllerBase
     return user;
   }
 
-  // POST: api/users
   [HttpPost]
   public async Task<ActionResult<User>> PostUser(User user)
   {
+    var hasher = new PasswordHasher<User>();
+    user.Password = hasher.HashPassword(null, user.Password);
     _context.Users.Add(user);
     await _context.SaveChangesAsync();
 
     return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
   }
 
-  // PUT: api/users/5
+  [Authorize]
   [HttpPut("{id}")]
   public async Task<IActionResult> PutUser(int id, User user)
   {
@@ -77,7 +79,7 @@ public class UsersController : ControllerBase
     return NoContent();
   }
 
-  // DELETE: api/users/5
+  [Authorize]
   [HttpDelete("{id}")]
   public async Task<IActionResult> DeleteUser(int id)
   {
@@ -96,12 +98,5 @@ public class UsersController : ControllerBase
   private bool UserExists(int id)
   {
     return _context.Users.Any(e => e.Id == id);
-  }
-
-  // dummy method to test the connection
-  [HttpGet("hello")]
-  public string Test()
-  {
-    return "Hello World!";
   }
 }
