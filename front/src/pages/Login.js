@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from "react";
 import { Box, Text } from "grommet";
 import { MailOption, Lock } from "grommet-icons";
 import { useNavigate } from "react-router-dom";
+import jwt_decode from "jwt-decode";
 import api from "../api";
 import FormCard from "../components/FormCard";
 import AlertModal from "../components/AlertModal";
@@ -42,16 +43,14 @@ const Login = () => {
           headers: { "Content-Type": "application/json" },
         });
         const { value: token } = data;
-        const { email } = credentials;
-        const user = {
-          email,
-        };
+        const user = jwt_decode(token);
         if (token) {
           setSuccess(true)
           setTimeout(() => {
             history("/home");
             localStorage.setItem("token", token);
-            localStorage.setItem("user", JSON.stringify(user));
+            localStorage.setItem("user", user["email"]);
+            localStorage.setItem("role", user["role"]);
           }, 500);
         }
       } catch (e) {

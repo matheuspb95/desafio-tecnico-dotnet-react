@@ -79,7 +79,7 @@ public class UsersController : ControllerBase
     return NoContent();
   }
 
-  [Authorize]
+  [Authorize(AccesType == Models.AccesTypes.Admin)]
   [HttpDelete("{id}")]
   public async Task<IActionResult> DeleteUser(int id)
   {

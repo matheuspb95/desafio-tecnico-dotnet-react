@@ -3,13 +3,15 @@ import {
   Box,
   DataTable,
   Text,
-  Avatar,
+  Heading,
   Button,
+  Card,
+  Layer,
   Pagination,
   Footer,
   TextInput,
 } from "grommet";
-import { Edit, Folder, Search, UserManager } from "grommet-icons";
+import { Trash, Search } from "grommet-icons";
 import AlertModal from "../components/AlertModal";
 import api from "../api";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -19,6 +21,7 @@ const Users = (props) => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [errors, setErrors] = useState([]);
+  const [askDelete, setAskDelete] = useState(-1);
   const history = useNavigate();
   let location = useLocation();
 
@@ -27,7 +30,7 @@ const Users = (props) => {
       const token = localStorage.getItem("token");
       try {
         const { data } = await api.get("/api/user", {
-        headers: {
+          headers: {
             accept: "application/json",
             Authorization: `Bearer ${token}`,
           },
@@ -53,14 +56,14 @@ const Users = (props) => {
   };
 
   return (
-    <Box direction="row">
-      <Box fill>
-        <Box pad="small" fill background="light-3">
+    <Box fill direction="row">
+      <Box align="center" justify="center" fill background="light-3">
+        <Card width="xxlarge" round="xsmall" background="light-1">
           <Box background="light-1">
             <Box margin="small">
-              <Text margin={{ vertical: "xsmall" }} size="16px">
+              <Heading margin={{ vertical: "xsmall" }} size="16px">
                 Users
-              </Text>
+              </Heading>
               <TextInput
                 onChange={(evt) => {
                   setPage(1);
@@ -82,35 +85,24 @@ const Users = (props) => {
                   }}
                   columns={[
                     {
-                      property: "#",
-                      header: <Text>#</Text>,
-                      render: () => <Text size="14px">#</Text>,
-                    },
-                    {
                       property: "name",
                       header: <Text {...headerProps}>Name</Text>,
                       render: (pract) => {
-                        return (
-                          <Text size="12px">{pract.name}</Text>
-                        );
+                        return <Text size="2vh">{pract.name}</Text>;
                       },
                     },
                     {
                       property: "sur_name",
                       header: <Text {...headerProps}>Sur Name</Text>,
                       render: (pract) => {
-                        return (
-                          <Text size="12px">{pract.surName}</Text>
-                        );
+                        return <Text size="2vh">{pract.surName}</Text>;
                       },
                     },
                     {
                       property: "email",
                       header: <Text {...headerProps}>Email</Text>,
                       render: (pract) => {
-                        return (
-                          <Text size="12px">{pract.email}</Text>
-                        );
+                        return <Text size="2vh">{pract.email}</Text>;
                       },
                     },
                     {
@@ -118,21 +110,40 @@ const Users = (props) => {
                       header: <Text {...headerProps}>Access Type</Text>,
                       render: (pract) => {
                         return (
-                          <Text size="12px">{pract.accesType ? "Normal":"Admin"}</Text>
+                          <Text size="2vh">
+                            {pract.accesType ? "Normal" : "Admin"}
+                          </Text>
                         );
                       },
                     },
+                    ...(localStorage.getItem("role") === "Admin" ? [{
+                      property: "buttons",
+                      render: (user) => {
+                        return (
+                          <Box direction="row" gap="small">
+                            <Button
+                              size="small"
+                              style={{ borderRadius: "4px" }}
+                              primary
+                              color="status-critical"
+                              icon={<Trash size="14px" />}
+                              onClick={() => setAskDelete(user.id)}
+                            />
+                          </Box>
+                        );
+                      },
+                    }] : []),
                   ]}
                   border={{
                     color: "light-4",
-                    side: "horizontal",
+                    side: "all",
                     size: "xsmall",
                   }}
                   data={listData
                     .filter((d) =>
                       d.name.toLowerCase().includes(search.toLowerCase())
                     )
-                    .slice((page - 1) * 5, page * 5)}
+                    .slice((page - 1) * 10, page * 10)}
                 />
               ) : (
                 <Box align="center">
@@ -141,23 +152,58 @@ const Users = (props) => {
               )}
             </Box>
           </Box>
-        </Box>
+        </Card>
         <Footer justify="center">
           <Pagination
             numberMiddlePages={6}
             margin="small"
             onChange={({ page }) => setPage(page)}
             size="small"
-            step={5}
+            step={10}
             numberItems={
-              listData.filter((d) =>
-                d.name.toLowerCase().includes(search.toLowerCase())
+              listData.filter(
+                (d) =>
+                  d.name.toLowerCase().includes(search.toLowerCase()) &&
+                  d.surName.toLowerCase().includes(search.toLowerCase()) &&
+                  d.email.toLowerCase().includes(search.toLowerCase())
               ).length
             }
           />
         </Footer>
       </Box>
       <AlertModal errors={errors} setErrors={setErrors} />
+      {askDelete >= 0 && (
+        <Layer
+          onEsc={() => setAskDelete(-1)}
+          onClickOutside={() => setAskDelete(-1)}
+        >
+          <Box pad="medium">
+            <Heading color="status-critical">DELETE</Heading>
+            <Text>Confirm user delete</Text>
+            <Box direction="row" gap="xsmall">
+              <Button
+                label="YES"
+                color="status-ok"
+                onClick={async () => {
+                  try {
+                    await api.delete(`/api/user/${askDelete}`, {
+                      headers: {
+                        accept: "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                      },
+                    });
+                    history("/home")
+                  } catch (e) {
+                    errors.push("Network Error", e);
+                    setAskDelete(-1);
+                  }
+                }}
+              />
+              <Button label="NO" color="status-critical" onClick={() => setAskDelete(-1)} />
+            </Box>
+          </Box>
+        </Layer>
+      )}
     </Box>
   );
 };
