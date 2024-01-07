@@ -35,21 +35,21 @@ const Login = () => {
   const signIn = useCallback(
     async (credentials) => {
       const bodyFormData = new FormData();
-      bodyFormData.append("username", credentials.email);
+      bodyFormData.append("email", credentials.email);
       bodyFormData.append("password", credentials.password);
       try {
-        const { data } = await api.post("/users/login", bodyFormData, {
-          headers: { "Content-Type": "multipart/form-data" },
+        const { data } = await api.post("/api/auth/login", bodyFormData, {
+          headers: { "Content-Type": "application/json" },
         });
-        const { access_token: token } = data;
+        const { value: token } = data;
         const { email } = credentials;
         const user = {
           email,
         };
         if (token) {
-          setSuccess(true);
+          setSuccess(true)
           setTimeout(() => {
-            history.push("/profile");
+            history("/home");
             localStorage.setItem("token", token);
             localStorage.setItem("user", JSON.stringify(user));
           }, 500);
