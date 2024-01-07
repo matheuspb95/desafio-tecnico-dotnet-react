@@ -20,8 +20,8 @@ const fields = [
     messageError: "Password not valid",
     placeholder: "Password",
     type: "password",
-    tip: "The password must contain at least 1 lowercase alphabetical character, 1 uppercase alphabetical character, 1 numeric character, at least one special character ([!@#$%*()_+=-.,:;|]).",
-    regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%*()_+=-.,:;|])(?=.{8,})/g,
+    tip: "The password must contain at least 1 lowercase alphabetical character, 1 uppercase alphabetical character, 1 numeric character, at least one special character ([!@#$%*()_+=-.,|:;/?]).",
+    regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%*()_+=-\\.,|:;/?])(?=.{8,})/g,
     icon: Lock,
   },
 ];
