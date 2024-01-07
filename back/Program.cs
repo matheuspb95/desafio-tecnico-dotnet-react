@@ -92,4 +92,8 @@ app.MapControllers();
 
 app.UseCors();
 
+using var scope = app.Services.CreateScope();
+await using var dbContext = scope.ServiceProvider.GetRequiredService<UserContext>();
+await dbContext.Database.MigrateAsync();
+
 app.Run();

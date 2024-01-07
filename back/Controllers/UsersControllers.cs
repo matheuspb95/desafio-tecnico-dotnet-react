@@ -17,7 +17,7 @@ public class UsersController : ControllerBase
     _context = context;
   }
 
-  [Authorize]
+  // [Authorize]
   [HttpGet]
   public async Task<ActionResult<IEnumerable<User>>> GetUsers()
   {
@@ -79,7 +79,7 @@ public class UsersController : ControllerBase
     return NoContent();
   }
 
-  [Authorize(AccesType == Models.AccesTypes.Admin)]
+  [Authorize]
   [HttpDelete("{id}")]
   public async Task<IActionResult> DeleteUser(int id)
   {

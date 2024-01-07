@@ -116,23 +116,27 @@ const Users = (props) => {
                         );
                       },
                     },
-                    ...(localStorage.getItem("role") === "Admin" ? [{
+                    {
                       property: "buttons",
                       render: (user) => {
                         return (
                           <Box direction="row" gap="small">
-                            <Button
-                              size="small"
-                              style={{ borderRadius: "4px" }}
-                              primary
-                              color="status-critical"
-                              icon={<Trash size="14px" />}
-                              onClick={() => setAskDelete(user.id)}
-                            />
+                            {localStorage.getItem("role") === "Admin" && (
+                              <Box direction="row" gap="small">
+                                <Button
+                                  size="small"
+                                  style={{ borderRadius: "4px" }}
+                                  primary
+                                  color="status-critical"
+                                  icon={<Trash size="14px" />}
+                                  onClick={() => setAskDelete(user.id)}
+                                />
+                              </Box>
+                            )}
                           </Box>
                         );
                       },
-                    }] : []),
+                    },
                   ]}
                   border={{
                     color: "light-4",
@@ -189,17 +193,23 @@ const Users = (props) => {
                     await api.delete(`/api/user/${askDelete}`, {
                       headers: {
                         accept: "application/json",
-                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                        Authorization: `Bearer ${localStorage.getItem(
+                          "token"
+                        )}`,
                       },
                     });
-                    history("/home")
+                    history("/home");
                   } catch (e) {
                     errors.push("Network Error", e);
                     setAskDelete(-1);
                   }
                 }}
               />
-              <Button label="NO" color="status-critical" onClick={() => setAskDelete(-1)} />
+              <Button
+                label="NO"
+                color="status-critical"
+                onClick={() => setAskDelete(-1)}
+              />
             </Box>
           </Box>
         </Layer>
